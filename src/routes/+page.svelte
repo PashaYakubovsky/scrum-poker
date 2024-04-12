@@ -8,3 +8,5 @@
 		goto(String(randomId));
 	});
 </script>
+
+<title>Poker room</title>

@@ -17,6 +17,7 @@
 		"@sveltejs/kit": "^2.0.0",
 		"@sveltejs/vite-plugin-svelte": "^3.0.0",
 		"@types/eslint": "^8.56.0",
+		"@types/three": "^0.163.0",
 		"@typescript-eslint/eslint-plugin": "^7.0.0",
 		"@typescript-eslint/parser": "^7.0.0",
 		"autoprefixer": "^10.4.19",
@@ -39,7 +40,9 @@
 	"dependencies": {
 		"@sveltejs/adapter-node": "^5.0.1",
 		"express": "^4.19.2",
+		"gsap": "^3.12.5",
 		"socket.io": "^4.7.5",
-		"socket.io-client": "^4.7.5"
+		"socket.io-client": "^4.7.5",
+		"three": "^0.163.0"
 	}
 }

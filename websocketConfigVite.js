@@ -1,4 +1,3 @@
-// webSocketPluginVite.js
 import injectSocketIO from './src/lib/injectSocketIO';
 
 export const webSocketServer = {
