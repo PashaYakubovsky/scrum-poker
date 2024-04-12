@@ -38,9 +38,8 @@ export default function injectSocketIO(server) {
 		};
 		users[socket.id] = newUser;
 
-		// socket.onAny((event, ...args) => {
-		// 	// update users in active session
-		// 	// get all users from socket connections
+		// update users in active session
+		// get all users from socket connections
 		const activeConnections = io.sockets.adapter.rooms.get(activeSession.id) ?? new Set();
 		const activeConnectionsArray = Array.from(activeConnections);
 		console.log('activeConnections', activeConnections);
@@ -55,7 +54,6 @@ export default function injectSocketIO(server) {
 			activeSession.users = roomUsers ?? [];
 			io.to(roomId).emit('session', activeSession);
 		}
-		// });
 
 		socket.on('user', (values) => {
 			try {
@@ -66,13 +64,21 @@ export default function injectSocketIO(server) {
 						users[socket.id][key] = values[key];
 					}
 
-					io.to(roomId).emit('user', users[socket.id]);
+					io.to(roomId).emit('user', {
+						user: users[socket.id],
+						socketId: socket.id
+					});
 				}
 			} catch (err) {
 				console.log(err);
 			}
 
 			io.emit('session', activeSession);
+		});
+
+		socket.on('clear', () => {
+			activeSession.currentStory.votes = [];
+			io.to(roomId).emit('session', activeSession);
 		});
 
 		socket.on('message', (message) => {

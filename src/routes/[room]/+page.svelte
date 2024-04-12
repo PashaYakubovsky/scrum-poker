@@ -26,24 +26,43 @@
 			if (userJson) {
 				io.emit('user', userJson);
 			}
+
 			userName = userJson.name;
+			socketId = userJson.socketId;
 		} catch (err) {
 			console.log(err);
 		}
 
-		io.on('user', (user) => {
-			userName = user.name;
-			socketId = user.socketId;
-			localStorage.setItem('user', JSON.stringify(user));
+		io.on('user', (data) => {
+			if (io.id === data.socketId) {
+				userName = data.user.name;
+				localStorage.setItem('user', JSON.stringify(data.user));
+			}
 		});
 		io.on('session', (session) => {
 			scrumSession = session;
 			console.log(scrumSession);
 		});
 
+		const handleKeyPress = (e) => {
+			if (e.key === 'Escape') {
+				$overlayStore.openOverlay();
+
+				io.emit('clear');
+
+				setTimeout(() => {
+					$overlayStore.closeOverlay();
+				}, 3000);
+			}
+		};
+
+		document.addEventListener('keydown', handleKeyPress);
+
 		return () => {
 			io.off('name');
 			io.off('session');
+
+			document.removeEventListener('keydown', handleKeyPress);
 		};
 	});
 
@@ -87,16 +106,26 @@
 	<Overlay />
 {/if}
 
-<div class="w-screen bg-[#101828] flex text-[#F9FAFB] h-screen">
-	<div class="w-[25%] h-screen">
+<div class="w-screen bg-[#101828] flex text-[#F9FAFB] h-screen max-md:flex-col">
+	<div
+		class={`w-[25%] max-md:w-full h-full ${userName === '' ? 'fixed w-full bg-[#101828] align-middle z-10' : ''}`}
+	>
+		{#if userName === ''}
+			<div class="p-2">
+				<h1 class="text-4xl">Welcome to Poker</h1>
+				<p class="text-lg">Please enter your name to join the session</p>
+				<h3 class="text-sm">Your room: {$page.params.room}</h3>
+			</div>
+		{/if}
+
 		<!-- input area -->
 		<div class="p-2 w-full">
 			<label for="">Name</label>
 			<input
 				class="bg-gray-200 rounded-lg w-full px-2 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent text-black"
 				type="text"
-				on:blur={() => {
-					io.emit('user', { name: userName });
+				on:input={(e) => {
+					io.emit('user', { name: e.target.value });
 				}}
 				on:keypress={(e) => {
 					if (e.key === 'Enter') {
@@ -122,7 +151,7 @@
 		</div>
 	</div>
 	<!-- content area -->
-	<div class="w-[75%] h-screen ml-auto flex gap-1">
+	<div class="w-[75%] h-full max-md:w-full ml-auto flex gap-1 relative">
 		<div class="bg-[#475467] w-full p-2 flex flex-col gap-4 h-full">
 			<!-- Average box -->
 			<div class="p-2 rounded-lg text-center text-4xl">
@@ -164,7 +193,7 @@
 			</div>
 
 			<!-- input story points -->
-			<div class="flex flex-col gap-4 content-center align-middle mt-auto">
+			<div class="flex flex-col gap-4 content-center align-middle mt-auto sticky left-0 bottom-0">
 				<div class="flex gap-10 items-center">
 					<label for="storyPoints" class="w-[10rem] h-full">
 						<div
